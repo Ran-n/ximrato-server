@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/19 14:15:24.327737 )
+[//]: # (+ Revised: 	2026/03/19 14:31:51.141360 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -12,8 +12,8 @@ FastAPI backend for [ximrato-app](../ximrato-app). Serves a REST API with JWT au
 
 | Repo | Role |
 |------|------|
-| `ximrato-app` | Flet frontend |
-| `ximrato-server` | This repo — FastAPI backend |
+| [`ximrato-app`](https://github.com/Ran-n/ximrato-app) | Flet frontend |
+| [`ximrato-server`](https://github.com/Ran-n/ximrato-server) | This repo — FastAPI backend |
 
 ## v1 Scope
 
