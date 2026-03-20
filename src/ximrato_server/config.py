@@ -2,10 +2,14 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:38:31.844790
-Revised: 2026/03/20 07:38:31.844790
+Revised: 2026/03/20 08:01:10.954315
 """
 
 import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SECRET_KEY: str = os.getenv("SECRET_KEY", "change-me-in-production")
 ALGORITHM: str = "HS256"
