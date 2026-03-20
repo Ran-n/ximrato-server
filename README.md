@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/20 09:55:10.659144 )
+[//]: # (+ Revised: 	2026/03/20 10:52:28.109034 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -21,18 +21,23 @@ FastAPI backend for [ximrato-app](../ximrato-app). Serves a REST API with JWT au
 uv run uvicorn main:app --reload
 ```
 
+## Testing
+
+```bash
+uv run pytest tests/ -v
+```
+
 ## v1 Progress
 
 ### Done
 - Auth — register, login, token refresh (JWT, access + refresh tokens)
 - `GET /users/me` — return current user's profile
-- `PATCH /users/me` — update username, email, password
+- `PATCH /users/me` — update username, email, password, display name, sex, date of birth, height
+- `GET/PATCH /users/me/config` — unit preferences (weight kg/lb, distance km/mi, height cm/in); row created on first access
 - Health endpoint — `GET /` and `GET /health`
 - Structured logging — access log with timing, per-operation logs in all routers, 422 validation errors logged per field
 
 ### To Do
-- Extended user profile — display name, sex, date of birth, height (static fields on `users` table)
-- Unit config — `user_config` table, `GET/PATCH /users/me/config` (weight kg/lb, distance km/mi, height cm/in)
 - Exercises — DB-seeded fixed list, `GET /exercises`
 - Sessions — `POST /sessions` (create), `PATCH /sessions/{id}` (end), `GET /sessions` (history)
 - Sets — `POST /sessions/{id}/sets`, `GET /sessions/{id}/sets`
