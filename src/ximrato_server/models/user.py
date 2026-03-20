@@ -2,16 +2,20 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/20 12:02:43.067043
+Revised: 2026/03/20 13:13:46.842252
 """
 
 import enum
 from datetime import date, datetime, timezone
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, DateTime, Enum, Float, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ximrato_server.database import Base
+
+if TYPE_CHECKING:
+    from ximrato_server.models.session import WorkoutSession
 
 
 class Sex(str, enum.Enum):
@@ -59,6 +63,9 @@ class User(Base):
 
     config: Mapped["UserConfig"] = relationship(
         "UserConfig", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    sessions: Mapped[list["WorkoutSession"]] = relationship(
+        "WorkoutSession", back_populates="user", cascade="all, delete-orphan"
     )
 
 

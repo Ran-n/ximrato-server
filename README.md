@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/20 10:52:28.109034 )
+[//]: # (+ Revised: 	2026/03/20 18:22:34.139584 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -37,12 +37,14 @@ uv run pytest tests/ -v
 - Health endpoint — `GET /` and `GET /health`
 - Structured logging — access log with timing, per-operation logs in all routers, 422 validation errors logged per field
 
+- Exercises — DB-seeded fixed list (24 exercises across push/pull/legs/core), `GET /exercises`
+- Sessions — `POST /sessions` (start), `GET /sessions/active`, `GET /sessions` (history), `PATCH /sessions/{id}/end`
+- Sets — `POST /sessions/{id}/sets` (exercise, reps, weight, bodyweight_counted, RPE, to_failure)
+
 ### To Do
-- Exercises — DB-seeded fixed list, `GET /exercises`
-- Sessions — `POST /sessions` (create), `PATCH /sessions/{id}` (end), `GET /sessions` (history)
-- Sets — `POST /sessions/{id}/sets`, `GET /sessions/{id}/sets`
 - Cardio — `POST /cardio`, `GET /cardio` (history)
 - Body metrics — `POST /body-metrics`, `GET /body-metrics` (history)
+- i18n — multiple language support
 
 ## Data Model
 
@@ -54,9 +56,8 @@ All tables have `created_at` and `updated_at`.
 
 ### Strength
 - `exercises` — DB-seeded, fixed list for v1. Bodyweight exercises use `weight=0` + `bodyweight_counted` flag.
-- `sessions` — `started_at`, `ended_at`
-- `session_exercises` — join table with `order` column; same exercise can appear multiple times in one session
-- `sets` — reps, weight (decimal), bodyweight_counted, RPE (integer 6–10), to_failure, logged_at (timestamptz), rest_seconds (integer, null for first set — denormalized for read performance)
+- `workout_sessions` — `started_at`, `ended_at` (null while active), `notes`
+- `workout_sets` — `exercise_id`, `reps`, `weight`, `bodyweight_counted`, `rpe` (enum: no_reps_left/could_do_1/could_do_2/could_do_3/could_do_4_5/very_light), `to_failure`, `logged_at`
 
 ### Cardio
 - `cardio_exercises` — DB-seeded (running, cycling, rowing for v1)

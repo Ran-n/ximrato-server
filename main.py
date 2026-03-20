@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:10.111263
-Revised: 2026/03/20 09:49:17.865611
+Revised: 2026/03/20 13:13:49.685157
 """
 
 import logging
@@ -11,9 +11,11 @@ import time
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session as DbSession
 
 from ximrato_server.database import Base, engine
-from ximrato_server.routers import auth, health, users
+from ximrato_server.routers import auth, exercises, health, sessions, users
+from ximrato_server.seed import seed_exercises
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,10 +26,15 @@ log = logging.getLogger("ximrato")
 
 Base.metadata.create_all(bind=engine)
 
+with DbSession(engine) as db:
+    seed_exercises(db)
+
 app = FastAPI(title="ximrato-server")
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(exercises.router)
+app.include_router(sessions.router)
 
 
 @app.middleware("http")

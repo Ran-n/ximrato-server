@@ -2,11 +2,10 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 10:41:15.000000
-Revised: 2026/03/20 10:46:06.481905
+Revised: 2026/03/20 13:35:28.478079
 """
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -174,9 +173,7 @@ def test_update_sex_invalid(client):
 
 def test_get_config_defaults(client):
     tokens = _register(client, "cfg1", "cfg1@example.com")
-    r = client.get(
-        "/users/me/config", headers=_auth_header(tokens["access_token"])
-    )
+    r = client.get("/users/me/config", headers=_auth_header(tokens["access_token"]))
     assert r.status_code == 200
     data = r.json()
     assert data["weight_unit"] == "kg"
