@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:10.111263
-Revised: 2026/03/20 09:41:23.239695
+Revised: 2026/03/20 09:49:17.865611
 """
 
 import logging
@@ -13,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from ximrato_server.database import Base, engine
-from ximrato_server.routers import auth, health
+from ximrato_server.routers import auth, health, users
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,6 +27,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="ximrato-server")
 app.include_router(health.router)
 app.include_router(auth.router)
+app.include_router(users.router)
 
 
 @app.middleware("http")
