@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/03/24 08:51:55.122400
+Revised: 2026/03/24 12:12:08.545108
 """
 
 import logging
@@ -12,6 +12,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session as DbSession
@@ -41,6 +42,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="ximrato-server", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory=config.UPLOAD_DIR), name="static")
 app.include_router(health.router)
 app.include_router(auth.router)
