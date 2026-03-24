@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/20 13:13:46.842252
+Revised: 2026/03/23 11:57:36.330648
 """
 
 import enum
@@ -60,6 +60,7 @@ class User(Base):
     sex: Mapped[Sex | None] = mapped_column(Enum(Sex), nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
     height: Mapped[float | None] = mapped_column(Float, nullable=True)
+    avatar_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     config: Mapped["UserConfig"] = relationship(
         "UserConfig", back_populates="user", uselist=False, cascade="all, delete-orphan"

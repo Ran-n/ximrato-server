@@ -2,10 +2,11 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:25:00.000000
-Revised: 2026/03/20 13:35:28.408375
+Revised: 2026/03/24 07:36:02.472204
 """
 
 import itertools
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,8 +42,9 @@ def client(engine):
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        yield c
+    with patch("main.engine", engine):
+        with TestClient(app) as c:
+            yield c
     app.dependency_overrides.clear()
 
 

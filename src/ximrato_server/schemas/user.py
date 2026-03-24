@@ -2,13 +2,14 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/20 12:02:43.139275
+Revised: 2026/03/23 11:57:36.415058
 """
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, computed_field
 
+from ximrato_server import config
 from ximrato_server.models.user import DistanceUnit, HeightUnit, Sex, WeightUnit
 
 
@@ -20,8 +21,16 @@ class UserResponse(BaseModel):
     sex: Sex | None
     date_of_birth: date | None
     height: float | None
+    avatar_path: str | None = Field(None, exclude=True)
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def avatar_url(self) -> str | None:
+        if self.avatar_path is None:
+            return None
+        return f"{config.BASE_URL}/static/{self.avatar_path}"
 
     model_config = {"from_attributes": True}
 

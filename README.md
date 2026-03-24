@@ -1,12 +1,12 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/20 18:22:34.139584 )
+[//]: # (+ Revised: 	2026/03/24 08:45:28.323483 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
 
-FastAPI backend for [ximrato-app](../ximrato-app). Serves a REST API with JWT auth.
+FastAPI backend for [ximrato-app](../ximrato-app/README.md). Serves a REST API with JWT auth.
 
 ## Repos
 
@@ -15,10 +15,27 @@ FastAPI backend for [ximrato-app](../ximrato-app). Serves a REST API with JWT au
 | [`ximrato-app`](https://github.com/Ran-n/ximrato-app) | Flet frontend |
 | [`ximrato-server`](https://github.com/Ran-n/ximrato-server) | This repo — FastAPI backend |
 
+## Configuration
+
+Copy `.env.example` to `.env` and set the values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SECRET_KEY` | `change-me-in-production` | JWT signing key |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | Access token TTL |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `30` | Refresh token TTL |
+| `DATABASE_URL` | `sqlite:///./ximrato.db` | SQLAlchemy DB URL |
+| `UPLOAD_DIR` | `static` | Directory for user-uploaded files |
+| `BASE_URL` | `http://127.0.0.1:8000` | Public base URL (used to build avatar URLs); port is also used by uvicorn |
+
 ## Running
 
 ```bash
-uv run uvicorn main:app --reload
+uv run uvicorn main:app --reload --host 0.0.0.0
 ```
 
 ## Testing
@@ -40,6 +57,7 @@ uv run pytest tests/ -v
 - Exercises — DB-seeded fixed list (24 exercises across push/pull/legs/core), `GET /exercises`
 - Sessions — `POST /sessions` (start), `GET /sessions/active`, `GET /sessions` (history), `PATCH /sessions/{id}/end`
 - Sets — `POST /sessions/{id}/sets` (exercise, reps, weight, bodyweight_counted, RPE, to_failure)
+- Avatar — `POST /users/me/avatar` (upload; resized to 128×128, WebP quality 85, transparency preserved), `DELETE /users/me/avatar`; file served via `/static/avatars/`; `avatar_url` returned in `GET /users/me`
 
 ### To Do
 - Cardio — `POST /cardio`, `GET /cardio` (history)
@@ -51,7 +69,7 @@ uv run pytest tests/ -v
 All tables have `created_at` and `updated_at`.
 
 ### Users & Profile
-- `users` — credentials + static profile (display name, sex, date of birth, height)
+- `users` — credentials + static profile (display name, sex, date of birth, height, `avatar_path`)
 - `user_config` — per-user unit preferences (kg/lb, km/mi, cm/in)
 
 ### Strength

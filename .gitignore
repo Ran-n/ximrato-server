@@ -14,3 +14,7 @@ wheels/
 
 # SQLite database
 *.db
+
+# Uploaded avatars
+static/avatars/*
+!static/avatars/.gitkeep

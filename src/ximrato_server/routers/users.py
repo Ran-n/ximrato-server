@@ -2,13 +2,13 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/20 10:41:15.687130
+Revised: 2026/03/23 13:24:24.083385
 """
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ximrato_server.database import get_db
@@ -21,6 +21,7 @@ from ximrato_server.schemas.user import (
     UserResponse,
 )
 from ximrato_server.services import auth as auth_svc
+from ximrato_server.services import storage
 
 log = logging.getLogger("ximrato.users")
 
@@ -74,6 +75,54 @@ def update_me(
         db.refresh(current_user)
     log.info("update_me: success user_id=%d", current_user.id)
     return current_user
+
+
+def _maybe_delete_avatar(path: str, db: Session) -> None:
+    still_used = db.scalar(select(func.count(User.id)).where(User.avatar_path == path))
+    if not still_used:
+        storage.delete_avatar_file(path)
+
+
+_ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+_MAX_AVATAR_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+@router.post("/me/avatar", status_code=status.HTTP_204_NO_CONTENT)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if file.content_type not in _ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "unsupported image type"
+        )
+    data = await file.read()
+    if len(data) > _MAX_AVATAR_BYTES:
+        raise HTTPException(
+            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "file too large (max 5 MB)"
+        )
+    old_path = current_user.avatar_path
+    new_path = storage.save_avatar(data)
+    current_user.avatar_path = new_path
+    db.commit()
+    if old_path and old_path != new_path:
+        _maybe_delete_avatar(old_path, db)
+    log.info("upload_avatar: success user_id=%d", current_user.id)
+
+
+@router.delete("/me/avatar", status_code=status.HTTP_204_NO_CONTENT)
+def delete_avatar(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.avatar_path is None:
+        return
+    old_path = current_user.avatar_path
+    current_user.avatar_path = None
+    db.commit()
+    _maybe_delete_avatar(old_path, db)
+    log.info("delete_avatar: success user_id=%d", current_user.id)
 
 
 def _get_or_create_config(user: User, db: Session) -> UserConfig:
