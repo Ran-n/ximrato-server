@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 10:41:15.000000
-Revised: 2026/03/20 13:35:28.478079
+Revised: 2026/03/25 12:30:30.660892
 """
 
 import pytest
@@ -179,6 +179,7 @@ def test_get_config_defaults(client):
     assert data["weight_unit"] == "kg"
     assert data["distance_unit"] == "km"
     assert data["height_unit"] == "cm"
+    assert data["language"] == "en"
 
 
 def test_get_config_idempotent(client):
@@ -207,6 +208,18 @@ def test_update_config(client):
     assert data["weight_unit"] == "lb"
     assert data["distance_unit"] == "mi"
     assert data["height_unit"] == "in"
+
+
+def test_update_config_language(client):
+    tokens = _register(client, "cfg3b", "cfg3b@example.com")
+    headers = _auth_header(tokens["access_token"])
+    r = client.patch(
+        "/users/me/config",
+        json={"language": "gl"},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    assert r.json()["language"] == "gl"
 
 
 def test_update_config_partial(client):

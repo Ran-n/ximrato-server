@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/25 10:48:26.298989
+Revised: 2026/03/25 12:30:29.926654
 """
 
 from datetime import date, datetime, timezone
@@ -16,7 +16,13 @@ from ximrato_server.database import Base
 if TYPE_CHECKING:
     from ximrato_server.models.auth_event import AuthEvent
     from ximrato_server.models.cardio import CardioLog
-    from ximrato_server.models.lookup import DistanceUnit, HeightUnit, Sex, WeightUnit
+    from ximrato_server.models.lookup import (
+        DistanceUnit,
+        HeightUnit,
+        Language,
+        Sex,
+        WeightUnit,
+    )
     from ximrato_server.models.session import WorkoutSession
 
 
@@ -82,11 +88,13 @@ class UserConfig(Base):
     weight_unit_id: Mapped[int] = mapped_column(ForeignKey("weight_units.id"))
     distance_unit_id: Mapped[int] = mapped_column(ForeignKey("distance_units.id"))
     height_unit_id: Mapped[int] = mapped_column(ForeignKey("height_units.id"))
+    language_id: Mapped[int] = mapped_column(ForeignKey("languages.id"))
 
     user: Mapped["User"] = relationship("User", back_populates="config")
     weight_unit_ref: Mapped["WeightUnit"] = relationship("WeightUnit")
     distance_unit_ref: Mapped["DistanceUnit"] = relationship("DistanceUnit")
     height_unit_ref: Mapped["HeightUnit"] = relationship("HeightUnit")
+    language_ref: Mapped["Language"] = relationship("Language")
 
     @property
     def weight_unit(self) -> str:
@@ -99,3 +107,7 @@ class UserConfig(Base):
     @property
     def height_unit(self) -> str:
         return self.height_unit_ref.name
+
+    @property
+    def language(self) -> str:
+        return self.language_ref.name

@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 10:30:44.634680
-Revised: 2026/03/25 10:48:30.211428
+Revised: 2026/03/25 12:30:30.205019
 """
 
 import enum
@@ -42,3 +42,8 @@ class EventTypeEnum(str, enum.Enum):
     login = "login"
     logout = "logout"
     register = "register"
+
+
+class LanguageEnum(str, enum.Enum):
+    en = "en"
+    gl = "gl"

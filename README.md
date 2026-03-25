@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/25 10:48:25.962155 )
+[//]: # (+ Revised: 	2026/03/25 12:33:32.373440 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -61,10 +61,10 @@ uv run pytest tests/ -v
 - Cardio exercises — DB-seeded (Running, Cycling, Rowing), `GET /cardio/exercises`
 - Cardio logs — `POST /cardio` (duration, distance, optional HR/elevation/stroke rate), `GET /cardio` (history, newest first)
 - Auth events — `POST /auth/logout` (records logout event), `GET /auth/events` (history newest first); login and register also record events
+- i18n — language preference stored in `user_config` (`language` field, FK → `languages`); supported: `en`, `gl`
 
 ### To Do
 - Body metrics — `POST /body-metrics`, `GET /body-metrics` (history)
-- i18n — multiple language support
 
 ## Data Model
 
@@ -78,10 +78,11 @@ All tables have `created_at` and `updated_at`.
 - `weight_units` — seeded: kg, lb
 - `distance_units` — seeded: km, mi
 - `height_units` — seeded: cm, in
+- `languages` — seeded: en, gl
 
 ### Users & Profile
 - `users` — credentials + static profile (display name, `sex_id` → `sexes`, date of birth, height, `avatar_path`)
-- `user_config` — per-user unit preferences (`weight_unit_id` → `weight_units`, `distance_unit_id` → `distance_units`, `height_unit_id` → `height_units`)
+- `user_config` — per-user preferences (`weight_unit_id` → `weight_units`, `distance_unit_id` → `distance_units`, `height_unit_id` → `height_units`, `language_id` → `languages`)
 - `auth_events` — per-user event log: `event_type_id` → `event_types`, `occurred_at`
 
 ### Strength

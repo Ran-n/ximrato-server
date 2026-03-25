@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 10:30:44.730768
-Revised: 2026/03/25 10:48:30.293502
+Revised: 2026/03/25 12:30:30.447240
 """
 
 from sqlalchemy import select
@@ -13,11 +13,13 @@ from ximrato_server.models.lookup import (
     EventType,
     ExerciseCategory,
     HeightUnit,
+    Language,
     RpeLevel,
     Sex,
     WeightUnit,
 )
 
+_LANGUAGES = ["en", "gl"]
 _EVENT_TYPES = ["login", "logout", "register"]
 _RPE_LEVELS = [
     "no_reps_left",
@@ -43,6 +45,7 @@ def _seed_table(db: Session, model, names: list[str]) -> None:
 
 
 def seed_all_lookup(db: Session) -> None:
+    _seed_table(db, Language, _LANGUAGES)
     _seed_table(db, EventType, _EVENT_TYPES)
     _seed_table(db, RpeLevel, _RPE_LEVELS)
     _seed_table(db, ExerciseCategory, _EXERCISE_CATEGORIES)

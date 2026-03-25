@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 07:33:53.806180
-Revised: 2026/03/25 10:48:26.134841
+Revised: 2026/03/25 12:30:30.084911
 """
 
 # Import all models here so SQLAlchemy's mapper registry has every class
@@ -14,6 +14,7 @@ from ximrato_server.models.lookup import (  # noqa: F401
     EventType,
     ExerciseCategory,
     HeightUnit,
+    Language,
     RpeLevel,
     Sex,
     WeightUnit,

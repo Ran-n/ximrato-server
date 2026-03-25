@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/25 10:48:26.959279
+Revised: 2026/03/25 12:30:30.349150
 """
 
 from datetime import date, datetime
@@ -13,6 +13,7 @@ from ximrato_server import config
 from ximrato_server.schemas.enums import (
     DistanceUnitEnum,
     HeightUnitEnum,
+    LanguageEnum,
     SexEnum,
     WeightUnitEnum,
 )
@@ -55,6 +56,7 @@ class UserConfigResponse(BaseModel):
     weight_unit: WeightUnitEnum
     distance_unit: DistanceUnitEnum
     height_unit: HeightUnitEnum
+    language: LanguageEnum
     created_at: datetime
     updated_at: datetime
 
@@ -65,3 +67,4 @@ class UpdateUserConfigRequest(BaseModel):
     weight_unit: WeightUnitEnum | None = None
     distance_unit: DistanceUnitEnum | None = None
     height_unit: HeightUnitEnum | None = None
+    language: LanguageEnum | None = None

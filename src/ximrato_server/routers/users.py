@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/25 10:48:26.635295
+Revised: 2026/03/25 12:30:30.564805
 """
 
 import logging
@@ -13,7 +13,13 @@ from sqlalchemy.orm import Session
 
 from ximrato_server.database import get_db
 from ximrato_server.deps import get_current_user
-from ximrato_server.models.lookup import DistanceUnit, HeightUnit, Sex, WeightUnit
+from ximrato_server.models.lookup import (
+    DistanceUnit,
+    HeightUnit,
+    Language,
+    Sex,
+    WeightUnit,
+)
 from ximrato_server.models.user import User, UserConfig
 from ximrato_server.schemas.user import (
     UpdateUserConfigRequest,
@@ -140,6 +146,7 @@ def _get_or_create_config(user: User, db: Session) -> UserConfig:
             weight_unit_id=_lookup_id(db, WeightUnit, "kg"),
             distance_unit_id=_lookup_id(db, DistanceUnit, "km"),
             height_unit_id=_lookup_id(db, HeightUnit, "cm"),
+            language_id=_lookup_id(db, Language, "en"),
         )
         db.add(cfg)
         db.commit()
@@ -174,6 +181,8 @@ def update_config(
         cfg.distance_unit_id = _lookup_id(db, DistanceUnit, body.distance_unit.value)
     if body.height_unit is not None:
         cfg.height_unit_id = _lookup_id(db, HeightUnit, body.height_unit.value)
+    if body.language is not None:
+        cfg.language_id = _lookup_id(db, Language, body.language.value)
     if db.is_modified(cfg):
         db.commit()
         db.refresh(cfg)
