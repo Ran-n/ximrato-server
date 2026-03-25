@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:00:00.000000
-Revised: 2026/03/20 13:13:49.619684
+Revised: 2026/03/25 10:48:26.546214
 """
 
 import logging
@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ximrato_server.database import get_db
 from ximrato_server.deps import get_current_user
+from ximrato_server.models.lookup import RpeLevel
 from ximrato_server.models.session import Exercise, WorkoutSession, WorkoutSet
 from ximrato_server.models.user import User
 from ximrato_server.schemas.session import (
@@ -27,7 +28,12 @@ log = logging.getLogger("ximrato.sessions")
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
-_SESSION_LOAD = [selectinload(WorkoutSession.sets).selectinload(WorkoutSet.exercise)]
+_SESSION_LOAD = [
+    selectinload(WorkoutSession.sets)
+    .selectinload(WorkoutSet.exercise)
+    .selectinload(Exercise.category_ref),
+    selectinload(WorkoutSession.sets).selectinload(WorkoutSet.rpe_level),
+]
 
 
 def _get_session_or_404(session_id: int, user: User, db: Session) -> WorkoutSession:
@@ -142,13 +148,21 @@ def add_set(
     exercise = db.get(Exercise, body.exercise_id)
     if not exercise:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "exercise not found")
+
+    rpe_level_id: int | None = None
+    if body.rpe is not None:
+        row = db.scalar(select(RpeLevel).where(RpeLevel.name == body.rpe.value))
+        if row is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "unknown rpe")
+        rpe_level_id = row.id
+
     wset = WorkoutSet(
         session_id=ws.id,
         exercise_id=body.exercise_id,
         reps=body.reps,
         weight=body.weight,
         bodyweight_counted=body.bodyweight_counted,
-        rpe=body.rpe,
+        rpe_level_id=rpe_level_id,
         to_failure=body.to_failure,
     )
     db.add(wset)
@@ -157,5 +171,8 @@ def add_set(
     return db.scalar(
         select(WorkoutSet)
         .where(WorkoutSet.id == wset.id)
-        .options(selectinload(WorkoutSet.exercise))
+        .options(
+            selectinload(WorkoutSet.exercise).selectinload(Exercise.category_ref),
+            selectinload(WorkoutSet.rpe_level),
+        )
     )

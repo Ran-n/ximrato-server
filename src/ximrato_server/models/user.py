@@ -2,42 +2,22 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/24 18:02:47.110855
+Revised: 2026/03/25 10:48:26.298989
 """
 
-import enum
 from datetime import date, datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, DateTime, Enum, Float, ForeignKey, String, func
+from sqlalchemy import Date, DateTime, Float, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ximrato_server.database import Base
 
 if TYPE_CHECKING:
+    from ximrato_server.models.auth_event import AuthEvent
     from ximrato_server.models.cardio import CardioLog
+    from ximrato_server.models.lookup import DistanceUnit, HeightUnit, Sex, WeightUnit
     from ximrato_server.models.session import WorkoutSession
-
-
-class Sex(str, enum.Enum):
-    male = "male"
-    female = "female"
-    other = "other"
-
-
-class WeightUnit(str, enum.Enum):
-    kg = "kg"
-    lb = "lb"
-
-
-class DistanceUnit(str, enum.Enum):
-    km = "km"
-    mi = "mi"
-
-
-class HeightUnit(str, enum.Enum):
-    cm = "cm"
-    inch = "in"
 
 
 class User(Base):
@@ -58,11 +38,12 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(256))
 
     display_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    sex: Mapped[Sex | None] = mapped_column(Enum(Sex), nullable=True)
+    sex_id: Mapped[int | None] = mapped_column(ForeignKey("sexes.id"), nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
     height: Mapped[float | None] = mapped_column(Float, nullable=True)
     avatar_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
+    sex_ref: Mapped["Sex | None"] = relationship("Sex")
     config: Mapped["UserConfig"] = relationship(
         "UserConfig", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
@@ -72,6 +53,13 @@ class User(Base):
     cardio_logs: Mapped[list["CardioLog"]] = relationship(
         "CardioLog", back_populates="user", cascade="all, delete-orphan"
     )
+    auth_events: Mapped[list["AuthEvent"]] = relationship(
+        "AuthEvent", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    @property
+    def sex(self) -> str | None:
+        return self.sex_ref.name if self.sex_ref else None
 
 
 class UserConfig(Base):
@@ -91,16 +79,23 @@ class UserConfig(Base):
         ForeignKey("users.id"), unique=True, index=True
     )
 
-    weight_unit: Mapped[WeightUnit] = mapped_column(
-        Enum(WeightUnit), default=WeightUnit.kg, server_default=WeightUnit.kg.value
-    )
-    distance_unit: Mapped[DistanceUnit] = mapped_column(
-        Enum(DistanceUnit),
-        default=DistanceUnit.km,
-        server_default=DistanceUnit.km.value,
-    )
-    height_unit: Mapped[HeightUnit] = mapped_column(
-        Enum(HeightUnit), default=HeightUnit.cm, server_default=HeightUnit.cm.value
-    )
+    weight_unit_id: Mapped[int] = mapped_column(ForeignKey("weight_units.id"))
+    distance_unit_id: Mapped[int] = mapped_column(ForeignKey("distance_units.id"))
+    height_unit_id: Mapped[int] = mapped_column(ForeignKey("height_units.id"))
 
     user: Mapped["User"] = relationship("User", back_populates="config")
+    weight_unit_ref: Mapped["WeightUnit"] = relationship("WeightUnit")
+    distance_unit_ref: Mapped["DistanceUnit"] = relationship("DistanceUnit")
+    height_unit_ref: Mapped["HeightUnit"] = relationship("HeightUnit")
+
+    @property
+    def weight_unit(self) -> str:
+        return self.weight_unit_ref.name
+
+    @property
+    def distance_unit(self) -> str:
+        return self.distance_unit_ref.name
+
+    @property
+    def height_unit(self) -> str:
+        return self.height_unit_ref.name

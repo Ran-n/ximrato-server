@@ -2,14 +2,14 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:00:00.000000
-Revised: 2026/03/20 13:13:46.909989
+Revised: 2026/03/25 10:48:26.867481
 """
 
 from datetime import datetime
 
 from pydantic import BaseModel
 
-from ximrato_server.models.session import RPE
+from ximrato_server.schemas.enums import RPEEnum
 
 
 class ExerciseResponse(BaseModel):
@@ -26,7 +26,7 @@ class WorkoutSetResponse(BaseModel):
     reps: int
     weight: float
     bodyweight_counted: bool
-    rpe: RPE | None
+    rpe: RPEEnum | None
     to_failure: bool
     logged_at: datetime
 
@@ -54,5 +54,5 @@ class AddSetRequest(BaseModel):
     reps: int
     weight: float
     bodyweight_counted: bool = False
-    rpe: RPE | None = None
+    rpe: RPEEnum | None = None
     to_failure: bool = False

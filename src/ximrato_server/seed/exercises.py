@@ -2,12 +2,13 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:00:00.000000
-Revised: 2026/03/20 13:13:46.975511
+Revised: 2026/03/25 10:48:27.135252
 """
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ximrato_server.models.lookup import ExerciseCategory
 from ximrato_server.models.session import Exercise
 
 _EXERCISES: list[tuple[str, str]] = [
@@ -40,9 +41,13 @@ _EXERCISES: list[tuple[str, str]] = [
 
 
 def seed_exercises(db: Session) -> None:
+    # build category name → id map
+    cat_rows = db.execute(select(ExerciseCategory.name, ExerciseCategory.id)).all()
+    cat_map: dict[str, int] = {row.name: row.id for row in cat_rows}
+
     existing = set(db.scalars(select(Exercise.name)).all())
     new = [
-        Exercise(name=name, category=category)
+        Exercise(name=name, category_id=cat_map.get(category))
         for name, category in _EXERCISES
         if name not in existing
     ]

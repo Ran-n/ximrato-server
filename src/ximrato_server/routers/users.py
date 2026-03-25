@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/23 13:24:24.083385
+Revised: 2026/03/25 10:48:26.635295
 """
 
 import logging
@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from ximrato_server.database import get_db
 from ximrato_server.deps import get_current_user
+from ximrato_server.models.lookup import DistanceUnit, HeightUnit, Sex, WeightUnit
 from ximrato_server.models.user import User, UserConfig
 from ximrato_server.schemas.user import (
     UpdateUserConfigRequest,
@@ -26,6 +27,13 @@ from ximrato_server.services import storage
 log = logging.getLogger("ximrato.users")
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+def _lookup_id(db: Session, model, name: str) -> int:
+    row = db.scalar(select(model).where(model.name == name))
+    if row is None:
+        raise RuntimeError(f"{model.__tablename__} value not seeded: {name!r}")
+    return row.id
 
 
 @router.get("/me", response_model=UserResponse)
@@ -65,7 +73,7 @@ def update_me(
     if body.display_name is not None:
         current_user.display_name = body.display_name
     if body.sex is not None:
-        current_user.sex = body.sex
+        current_user.sex_id = _lookup_id(db, Sex, body.sex.value)
     if body.date_of_birth is not None:
         current_user.date_of_birth = body.date_of_birth
     if body.height is not None:
@@ -127,7 +135,12 @@ def delete_avatar(
 
 def _get_or_create_config(user: User, db: Session) -> UserConfig:
     if user.config is None:
-        cfg = UserConfig(user_id=user.id)
+        cfg = UserConfig(
+            user_id=user.id,
+            weight_unit_id=_lookup_id(db, WeightUnit, "kg"),
+            distance_unit_id=_lookup_id(db, DistanceUnit, "km"),
+            height_unit_id=_lookup_id(db, HeightUnit, "cm"),
+        )
         db.add(cfg)
         db.commit()
         db.refresh(cfg)
@@ -156,11 +169,11 @@ def update_config(
     )
     cfg = _get_or_create_config(current_user, db)
     if body.weight_unit is not None:
-        cfg.weight_unit = body.weight_unit
+        cfg.weight_unit_id = _lookup_id(db, WeightUnit, body.weight_unit.value)
     if body.distance_unit is not None:
-        cfg.distance_unit = body.distance_unit
+        cfg.distance_unit_id = _lookup_id(db, DistanceUnit, body.distance_unit.value)
     if body.height_unit is not None:
-        cfg.height_unit = body.height_unit
+        cfg.height_unit_id = _lookup_id(db, HeightUnit, body.height_unit.value)
     if db.is_modified(cfg):
         db.commit()
         db.refresh(cfg)

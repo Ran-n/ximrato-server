@@ -2,29 +2,20 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:00:00.000000
-Revised: 2026/03/20 13:13:46.776517
+Revised: 2026/03/25 10:48:26.218917
 """
 
-import enum
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ximrato_server.database import Base
 
 if TYPE_CHECKING:
+    from ximrato_server.models.lookup import ExerciseCategory, RpeLevel
     from ximrato_server.models.user import User
-
-
-class RPE(str, enum.Enum):
-    no_reps_left = "no_reps_left"
-    could_do_1 = "could_do_1"
-    could_do_2 = "could_do_2"
-    could_do_3 = "could_do_3"
-    could_do_4_5 = "could_do_4_5"
-    very_light = "very_light"
 
 
 class Exercise(Base):
@@ -41,11 +32,18 @@ class Exercise(Base):
     )
 
     name: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    category: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    category_id: Mapped[int | None] = mapped_column(
+        ForeignKey("exercise_categories.id"), nullable=True
+    )
 
+    category_ref: Mapped["ExerciseCategory | None"] = relationship("ExerciseCategory")
     sets: Mapped[list["WorkoutSet"]] = relationship(
         "WorkoutSet", back_populates="exercise"
     )
+
+    @property
+    def category(self) -> str | None:
+        return self.category_ref.name if self.category_ref else None
 
 
 class WorkoutSession(Base):
@@ -99,7 +97,9 @@ class WorkoutSet(Base):
     reps: Mapped[int] = mapped_column(Integer)
     weight: Mapped[float] = mapped_column(Float)
     bodyweight_counted: Mapped[bool] = mapped_column(Boolean, default=False)
-    rpe: Mapped[RPE | None] = mapped_column(Enum(RPE), nullable=True)
+    rpe_level_id: Mapped[int | None] = mapped_column(
+        ForeignKey("rpe_levels.id"), nullable=True
+    )
     to_failure: Mapped[bool] = mapped_column(Boolean, default=False)
     logged_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -109,3 +109,8 @@ class WorkoutSet(Base):
         "WorkoutSession", back_populates="sets"
     )
     exercise: Mapped["Exercise"] = relationship("Exercise", back_populates="sets")
+    rpe_level: Mapped["RpeLevel | None"] = relationship("RpeLevel")
+
+    @property
+    def rpe(self) -> str | None:
+        return self.rpe_level.name if self.rpe_level else None

@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/03/25 07:33:44.156837
+Revised: 2026/03/25 10:48:26.051765
 """
 
 import logging
@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session as DbSession
 from ximrato_server import config, models  # noqa: F401 — registers all ORM models
 from ximrato_server.database import Base, engine
 from ximrato_server.routers import auth, cardio, exercises, health, sessions, users
-from ximrato_server.seed import seed_cardio_exercises, seed_exercises
+from ximrato_server.seed import seed_all_lookup, seed_cardio_exercises, seed_exercises
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,6 +34,7 @@ log = logging.getLogger("ximrato")
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     with DbSession(engine) as db:
+        seed_all_lookup(db)
         seed_exercises(db)
         seed_cardio_exercises(db)
     Path(config.UPLOAD_DIR).mkdir(exist_ok=True)

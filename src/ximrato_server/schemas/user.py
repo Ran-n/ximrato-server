@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/23 11:57:36.415058
+Revised: 2026/03/25 10:48:26.959279
 """
 
 from datetime import date, datetime
@@ -10,7 +10,12 @@ from datetime import date, datetime
 from pydantic import BaseModel, EmailStr, Field, computed_field
 
 from ximrato_server import config
-from ximrato_server.models.user import DistanceUnit, HeightUnit, Sex, WeightUnit
+from ximrato_server.schemas.enums import (
+    DistanceUnitEnum,
+    HeightUnitEnum,
+    SexEnum,
+    WeightUnitEnum,
+)
 
 
 class UserResponse(BaseModel):
@@ -18,7 +23,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
     display_name: str | None
-    sex: Sex | None
+    sex: SexEnum | None
     date_of_birth: date | None
     height: float | None
     avatar_path: str | None = Field(None, exclude=True)
@@ -41,15 +46,15 @@ class UpdateUserRequest(BaseModel):
     current_password: str | None = None
     password: str | None = None
     display_name: str | None = None
-    sex: Sex | None = None
+    sex: SexEnum | None = None
     date_of_birth: date | None = None
     height: float | None = None
 
 
 class UserConfigResponse(BaseModel):
-    weight_unit: WeightUnit
-    distance_unit: DistanceUnit
-    height_unit: HeightUnit
+    weight_unit: WeightUnitEnum
+    distance_unit: DistanceUnitEnum
+    height_unit: HeightUnitEnum
     created_at: datetime
     updated_at: datetime
 
@@ -57,6 +62,6 @@ class UserConfigResponse(BaseModel):
 
 
 class UpdateUserConfigRequest(BaseModel):
-    weight_unit: WeightUnit | None = None
-    distance_unit: DistanceUnit | None = None
-    height_unit: HeightUnit | None = None
+    weight_unit: WeightUnitEnum | None = None
+    distance_unit: DistanceUnitEnum | None = None
+    height_unit: HeightUnitEnum | None = None
