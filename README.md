@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/24 18:03:15.462172 )
+[//]: # (+ Revised: 	2026/03/25 10:48:25.962155 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -60,6 +60,7 @@ uv run pytest tests/ -v
 - Avatar — `POST /users/me/avatar` (upload; resized to 128×128, WebP quality 85, transparency preserved), `DELETE /users/me/avatar`; file served via `/static/avatars/`; `avatar_url` returned in `GET /users/me`
 - Cardio exercises — DB-seeded (Running, Cycling, Rowing), `GET /cardio/exercises`
 - Cardio logs — `POST /cardio` (duration, distance, optional HR/elevation/stroke rate), `GET /cardio` (history, newest first)
+- Auth events — `POST /auth/logout` (records logout event), `GET /auth/events` (history newest first); login and register also record events
 
 ### To Do
 - Body metrics — `POST /body-metrics`, `GET /body-metrics` (history)
@@ -69,14 +70,24 @@ uv run pytest tests/ -v
 
 All tables have `created_at` and `updated_at`.
 
+### Lookup Tables
+- `event_types` — seeded: login, logout, register
+- `exercise_categories` — seeded: push, pull, legs, core
+- `rpe_levels` — seeded: no_reps_left, could_do_1, could_do_2, could_do_3, could_do_4_5, very_light
+- `sexes` — seeded: male, female, other
+- `weight_units` — seeded: kg, lb
+- `distance_units` — seeded: km, mi
+- `height_units` — seeded: cm, in
+
 ### Users & Profile
-- `users` — credentials + static profile (display name, sex, date of birth, height, `avatar_path`)
-- `user_config` — per-user unit preferences (kg/lb, km/mi, cm/in)
+- `users` — credentials + static profile (display name, `sex_id` → `sexes`, date of birth, height, `avatar_path`)
+- `user_config` — per-user unit preferences (`weight_unit_id` → `weight_units`, `distance_unit_id` → `distance_units`, `height_unit_id` → `height_units`)
+- `auth_events` — per-user event log: `event_type_id` → `event_types`, `occurred_at`
 
 ### Strength
-- `exercises` — DB-seeded, fixed list for v1. Bodyweight exercises use `weight=0` + `bodyweight_counted` flag.
+- `exercises` — DB-seeded, fixed list for v1. Bodyweight exercises use `weight=0` + `bodyweight_counted` flag. `category_id` → `exercise_categories`.
 - `workout_sessions` — `started_at`, `ended_at` (null while active), `notes`
-- `workout_sets` — `exercise_id`, `reps`, `weight`, `bodyweight_counted`, `rpe` (enum: no_reps_left/could_do_1/could_do_2/could_do_3/could_do_4_5/very_light), `to_failure`, `logged_at`
+- `workout_sets` — `exercise_id`, `reps`, `weight`, `bodyweight_counted`, `rpe_level_id` → `rpe_levels`, `to_failure`, `logged_at`
 
 ### Cardio
 - `cardio_exercises` — DB-seeded (running, cycling, rowing for v1)
