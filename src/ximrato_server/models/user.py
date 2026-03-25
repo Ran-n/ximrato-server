@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/23 11:57:36.330648
+Revised: 2026/03/24 18:02:47.110855
 """
 
 import enum
@@ -15,6 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ximrato_server.database import Base
 
 if TYPE_CHECKING:
+    from ximrato_server.models.cardio import CardioLog
     from ximrato_server.models.session import WorkoutSession
 
 
@@ -67,6 +68,9 @@ class User(Base):
     )
     sessions: Mapped[list["WorkoutSession"]] = relationship(
         "WorkoutSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    cardio_logs: Mapped[list["CardioLog"]] = relationship(
+        "CardioLog", back_populates="user", cascade="all, delete-orphan"
     )
 
 

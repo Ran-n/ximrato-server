@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/03/24 12:12:08.545108
+Revised: 2026/03/25 07:33:44.156837
 """
 
 import logging
@@ -17,10 +17,10 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session as DbSession
 
-from ximrato_server import config
+from ximrato_server import config, models  # noqa: F401 — registers all ORM models
 from ximrato_server.database import Base, engine
-from ximrato_server.routers import auth, exercises, health, sessions, users
-from ximrato_server.seed import seed_exercises
+from ximrato_server.routers import auth, cardio, exercises, health, sessions, users
+from ximrato_server.seed import seed_cardio_exercises, seed_exercises
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     with DbSession(engine) as db:
         seed_exercises(db)
+        seed_cardio_exercises(db)
     Path(config.UPLOAD_DIR).mkdir(exist_ok=True)
     yield
     engine.dispose()
@@ -54,6 +55,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(exercises.router)
 app.include_router(sessions.router)
+app.include_router(cardio.router)
 
 
 @app.middleware("http")

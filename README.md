@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/24 08:45:28.323483 )
+[//]: # (+ Revised: 	2026/03/24 18:03:15.462172 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -58,9 +58,10 @@ uv run pytest tests/ -v
 - Sessions — `POST /sessions` (start), `GET /sessions/active`, `GET /sessions` (history), `PATCH /sessions/{id}/end`
 - Sets — `POST /sessions/{id}/sets` (exercise, reps, weight, bodyweight_counted, RPE, to_failure)
 - Avatar — `POST /users/me/avatar` (upload; resized to 128×128, WebP quality 85, transparency preserved), `DELETE /users/me/avatar`; file served via `/static/avatars/`; `avatar_url` returned in `GET /users/me`
+- Cardio exercises — DB-seeded (Running, Cycling, Rowing), `GET /cardio/exercises`
+- Cardio logs — `POST /cardio` (duration, distance, optional HR/elevation/stroke rate), `GET /cardio` (history, newest first)
 
 ### To Do
-- Cardio — `POST /cardio`, `GET /cardio` (history)
 - Body metrics — `POST /body-metrics`, `GET /body-metrics` (history)
 - i18n — multiple language support
 
