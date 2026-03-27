@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 10:30:44.634680
-Revised: 2026/03/25 12:30:30.205019
+Revised: 2026/03/27 07:43:00.699470
 """
 
 import enum
@@ -47,3 +47,4 @@ class EventTypeEnum(str, enum.Enum):
 class LanguageEnum(str, enum.Enum):
     en = "en"
     gl = "gl"
+    es = "es"

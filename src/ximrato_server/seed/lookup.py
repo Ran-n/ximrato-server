@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 10:30:44.730768
-Revised: 2026/03/25 12:30:30.447240
+Revised: 2026/03/27 07:43:00.911560
 """
 
 from sqlalchemy import select
@@ -19,7 +19,7 @@ from ximrato_server.models.lookup import (
     WeightUnit,
 )
 
-_LANGUAGES = ["en", "gl"]
+_LANGUAGES = ["en", "gl", "es"]
 _EVENT_TYPES = ["login", "logout", "register"]
 _RPE_LEVELS = [
     "no_reps_left",
