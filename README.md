@@ -1,7 +1,7 @@
 [//]: # ( ---------------------------------------------------------------------- )
 [//]: # (+ Authors: 	Ran# <ran.hash@proton.me> )
 [//]: # (+ Created: 	2026/03/19 13:06:17.162346 )
-[//]: # (+ Revised: 	2026/03/25 12:33:32.373440 )
+[//]: # (+ Revised: 	2026/03/27 21:24:37.287616 )
 [//]: # ( ---------------------------------------------------------------------- )
 
 # ximrato-server
@@ -62,9 +62,10 @@ uv run pytest tests/ -v
 - Cardio logs — `POST /cardio` (duration, distance, optional HR/elevation/stroke rate), `GET /cardio` (history, newest first)
 - Auth events — `POST /auth/logout` (records logout event), `GET /auth/events` (history newest first); login and register also record events
 - i18n — language preference stored in `user_config` (`language` field, FK → `languages`); supported: `en`, `gl`
+- Body metrics — `POST /body-metrics` (one measurement per request; `metric_type` validated against `metric_types` lookup table), `GET /body-metrics` (history, newest first); deprecated HTTP status constants replaced
 
 ### To Do
-- Body metrics — `POST /body-metrics`, `GET /body-metrics` (history)
+- History views — past sessions, cardio logs, body metric trends
 
 ## Data Model
 
@@ -79,6 +80,7 @@ All tables have `created_at` and `updated_at`.
 - `distance_units` — seeded: km, mi
 - `height_units` — seeded: cm, in
 - `languages` — seeded: en, gl
+- `metric_types` — seeded: weight, waist, chest, hips, neck, arms, thighs
 
 ### Users & Profile
 - `users` — credentials + static profile (display name, `sex_id` → `sexes`, date of birth, height, `avatar_path`)
@@ -99,7 +101,7 @@ All tables have `created_at` and `updated_at`.
   - stroke_rate (optional, rowing)
 
 ### Body Metrics
-- `body_metrics` — time-series log per user: weight, waist, chest, hips, neck, arms, thighs
+- `body_metrics` — one row per measurement: `metric_type_id` → `metric_types`, `value`, `logged_at`; each metric type is logged independently
 - Height is static on the user profile, not in body_metrics
 
 ## v2 (deferred)

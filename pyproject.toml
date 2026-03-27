@@ -1,6 +1,6 @@
 [project]
 name = "ximrato-server"
-version = "0.1.0"
+version = "0.2.0"
 description = "FastAPI backend for ximrato-app"
 readme = "README.md"
 requires-python = ">=3.12"

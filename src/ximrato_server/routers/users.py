@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 09:03:49.000000
-Revised: 2026/03/25 12:30:30.564805
+Revised: 2026/03/27 21:24:37.812676
 """
 
 import logging
@@ -69,12 +69,8 @@ def update_me(
         if body.current_password is None or not auth_svc.verify_password(
             body.current_password, current_user.hashed_password
         ):
-            log.warning(
-                "update_me: wrong current password for user_id=%d", current_user.id
-            )
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, "current password is incorrect"
-            )
+            log.warning("update_me: wrong current password for user_id=%d", current_user.id)
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "current password is incorrect")
         current_user.hashed_password = auth_svc.hash_password(body.password)
     if body.display_name is not None:
         current_user.display_name = body.display_name
@@ -108,14 +104,10 @@ async def upload_avatar(
     current_user: User = Depends(get_current_user),
 ):
     if file.content_type not in _ALLOWED_IMAGE_TYPES:
-        raise HTTPException(
-            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "unsupported image type"
-        )
+        raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "unsupported image type")
     data = await file.read()
     if len(data) > _MAX_AVATAR_BYTES:
-        raise HTTPException(
-            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "file too large (max 5 MB)"
-        )
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "file too large (max 5 MB)")
     old_path = current_user.avatar_path
     new_path = storage.save_avatar(data)
     current_user.avatar_path = new_path
@@ -171,9 +163,7 @@ def update_config(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    log.info(
-        "update_config: user_id=%d fields=%r", current_user.id, body.model_fields_set
-    )
+    log.info("update_config: user_id=%d fields=%r", current_user.id, body.model_fields_set)
     cfg = _get_or_create_config(current_user, db)
     if body.weight_unit is not None:
         cfg.weight_unit_id = _lookup_id(db, WeightUnit, body.weight_unit.value)

@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:00:00.000000
-Revised: 2026/03/25 10:48:26.546214
+Revised: 2026/03/27 21:24:37.695570
 """
 
 import logging
@@ -29,9 +29,7 @@ log = logging.getLogger("ximrato.sessions")
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 _SESSION_LOAD = [
-    selectinload(WorkoutSession.sets)
-    .selectinload(WorkoutSet.exercise)
-    .selectinload(Exercise.category_ref),
+    selectinload(WorkoutSession.sets).selectinload(WorkoutSet.exercise).selectinload(Exercise.category_ref),
     selectinload(WorkoutSession.sets).selectinload(WorkoutSet.rpe_level),
 ]
 
@@ -80,9 +78,7 @@ def list_sessions(
     ).all()
 
 
-@router.post(
-    "", response_model=WorkoutSessionResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("", response_model=WorkoutSessionResponse, status_code=status.HTTP_201_CREATED)
 def start_session(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -101,9 +97,7 @@ def start_session(
     db.commit()
     db.refresh(ws)
     log.info("start_session: session_id=%d", ws.id)
-    return db.scalar(
-        select(WorkoutSession).where(WorkoutSession.id == ws.id).options(*_SESSION_LOAD)
-    )
+    return db.scalar(select(WorkoutSession).where(WorkoutSession.id == ws.id).options(*_SESSION_LOAD))
 
 
 @router.patch("/{session_id}/end", response_model=WorkoutSessionResponse)
@@ -153,7 +147,7 @@ def add_set(
     if body.rpe is not None:
         row = db.scalar(select(RpeLevel).where(RpeLevel.name == body.rpe.value))
         if row is None:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "unknown rpe")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "unknown rpe")
         rpe_level_id = row.id
 
     wset = WorkoutSet(

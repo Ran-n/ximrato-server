@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 07:39:09.798479
-Revised: 2026/03/25 12:30:29.926654
+Revised: 2026/03/27 21:24:37.614496
 """
 
 from datetime import date, datetime, timezone
@@ -15,6 +15,7 @@ from ximrato_server.database import Base
 
 if TYPE_CHECKING:
     from ximrato_server.models.auth_event import AuthEvent
+    from ximrato_server.models.body_metric import BodyMetric
     from ximrato_server.models.cardio import CardioLog
     from ximrato_server.models.lookup import (
         DistanceUnit,
@@ -30,9 +31,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -62,6 +61,9 @@ class User(Base):
     auth_events: Mapped[list["AuthEvent"]] = relationship(
         "AuthEvent", back_populates="user", cascade="all, delete-orphan"
     )
+    body_metrics: Mapped[list["BodyMetric"]] = relationship(
+        "BodyMetric", back_populates="user", cascade="all, delete-orphan"
+    )
 
     @property
     def sex(self) -> str | None:
@@ -72,18 +74,14 @@ class UserConfig(Base):
     __tablename__ = "user_config"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"), unique=True, index=True
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
 
     weight_unit_id: Mapped[int] = mapped_column(ForeignKey("weight_units.id"))
     distance_unit_id: Mapped[int] = mapped_column(ForeignKey("distance_units.id"))

@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/03/25 10:48:26.051765
+Revised: 2026/03/27 21:24:37.368273
 """
 
 import logging
@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from ximrato_server import config, models  # noqa: F401 — registers all ORM models
 from ximrato_server.database import Base, engine
-from ximrato_server.routers import auth, cardio, exercises, health, sessions, users
+from ximrato_server.routers import auth, body_metrics, cardio, exercises, health, sessions, users
 from ximrato_server.seed import seed_all_lookup, seed_cardio_exercises, seed_exercises
 
 logging.basicConfig(
@@ -57,6 +57,7 @@ app.include_router(users.router)
 app.include_router(exercises.router)
 app.include_router(sessions.router)
 app.include_router(cardio.router)
+app.include_router(body_metrics.router)
 
 
 @app.middleware("http")
@@ -87,6 +88,6 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
             err.get("msg"),
         )
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"detail": errors},
     )

@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/25 10:30:44.730768
-Revised: 2026/03/27 07:43:00.911560
+Revised: 2026/03/27 21:24:37.893749
 """
 
 from sqlalchemy import select
@@ -14,6 +14,7 @@ from ximrato_server.models.lookup import (
     ExerciseCategory,
     HeightUnit,
     Language,
+    MetricType,
     RpeLevel,
     Sex,
     WeightUnit,
@@ -34,6 +35,7 @@ _SEXES = ["male", "female", "other"]
 _WEIGHT_UNITS = ["kg", "lb"]
 _DISTANCE_UNITS = ["km", "mi"]
 _HEIGHT_UNITS = ["cm", "in"]
+_METRIC_TYPES = ["weight", "waist", "chest", "hips", "neck", "arms", "thighs"]
 
 
 def _seed_table(db: Session, model, names: list[str]) -> None:
@@ -53,3 +55,4 @@ def seed_all_lookup(db: Session) -> None:
     _seed_table(db, WeightUnit, _WEIGHT_UNITS)
     _seed_table(db, DistanceUnit, _DISTANCE_UNITS)
     _seed_table(db, HeightUnit, _HEIGHT_UNITS)
+    _seed_table(db, MetricType, _METRIC_TYPES)
