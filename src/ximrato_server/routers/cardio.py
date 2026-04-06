@@ -61,9 +61,7 @@ def create_cardio_log(
     db.commit()
     db.refresh(clog)
     log.info("create_cardio_log: id=%d", clog.id)
-    return db.scalar(
-        select(CardioLog).where(CardioLog.id == clog.id).options(*_LOG_LOAD)
-    )
+    return db.scalar(select(CardioLog).where(CardioLog.id == clog.id).options(*_LOG_LOAD))
 
 
 @router.get("", response_model=list[CardioLogResponse])

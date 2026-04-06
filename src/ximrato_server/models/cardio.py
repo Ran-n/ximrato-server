@@ -21,9 +21,7 @@ class CardioExercise(Base):
     __tablename__ = "cardio_exercises"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -31,19 +29,17 @@ class CardioExercise(Base):
     )
 
     name: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    name_es: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    name_gl: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
-    logs: Mapped[list["CardioLog"]] = relationship(
-        "CardioLog", back_populates="exercise"
-    )
+    logs: Mapped[list["CardioLog"]] = relationship("CardioLog", back_populates="exercise")
 
 
 class CardioLog(Base):
     __tablename__ = "cardio_logs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -51,20 +47,14 @@ class CardioLog(Base):
     )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    exercise_id: Mapped[int] = mapped_column(
-        ForeignKey("cardio_exercises.id"), index=True
-    )
+    exercise_id: Mapped[int] = mapped_column(ForeignKey("cardio_exercises.id"), index=True)
     duration_seconds: Mapped[int] = mapped_column(Integer)
     distance: Mapped[float | None] = mapped_column(Float, nullable=True)
-    logged_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     rest_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     avg_heart_rate: Mapped[int | None] = mapped_column(Integer, nullable=True)
     elevation_gain: Mapped[float | None] = mapped_column(Float, nullable=True)
     stroke_rate: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="cardio_logs")
-    exercise: Mapped["CardioExercise"] = relationship(
-        "CardioExercise", back_populates="logs"
-    )
+    exercise: Mapped["CardioExercise"] = relationship("CardioExercise", back_populates="logs")

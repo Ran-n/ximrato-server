@@ -16,6 +16,12 @@ class ExerciseResponse(BaseModel):
     id: int
     name: str
     category: str | None
+    equipment_type: str | None = None
+    primary_muscles: list[str] | None = None
+    secondary_muscles: list[str] | None = None
+    description: str | None = None
+    name_es: str | None = None
+    name_gl: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -56,3 +62,10 @@ class AddSetRequest(BaseModel):
     bodyweight_counted: bool = False
     rpe: RPEEnum | None = None
     to_failure: bool = False
+
+
+class ExerciseProgressPoint(BaseModel):
+    date: str
+    max_weight: float
+    max_reps: int
+    total_volume: float

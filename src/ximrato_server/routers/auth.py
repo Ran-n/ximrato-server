@@ -37,9 +37,7 @@ def _event_type_id(db: Session, name: str) -> int:
     return row.id
 
 
-@router.post(
-    "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
     log.info("register attempt: username=%r email=%r", body.username, body.email)
     if db.scalar(select(User).where(User.username == body.username)):
@@ -81,12 +79,8 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
-):
-    db.add(
-        AuthEvent(user_id=current_user.id, event_type_id=_event_type_id(db, "logout"))
-    )
+def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    db.add(AuthEvent(user_id=current_user.id, event_type_id=_event_type_id(db, "logout")))
     db.commit()
     log.info("logout: user_id=%d username=%r", current_user.id, current_user.username)
 
@@ -111,9 +105,7 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/events", response_model=list[AuthEventOut])
-def list_events(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
-):
+def list_events(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     rows = db.scalars(
         select(AuthEvent)
         .where(AuthEvent.user_id == current_user.id)

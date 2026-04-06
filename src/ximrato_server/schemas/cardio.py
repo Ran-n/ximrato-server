@@ -13,6 +13,8 @@ from pydantic import BaseModel
 class CardioExerciseResponse(BaseModel):
     id: int
     name: str
+    name_es: str | None = None
+    name_gl: str | None = None
 
     model_config = {"from_attributes": True}
 

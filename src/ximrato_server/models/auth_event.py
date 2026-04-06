@@ -22,9 +22,7 @@ class AuthEvent(Base):
     __tablename__ = "auth_events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    occurred_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), index=True
-    )
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

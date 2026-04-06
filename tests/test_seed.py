@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:25:00.000000
-Revised: 2026/03/25 10:48:27.309412
+Revised: 2026/04/06 10:11:33.655105
 """
 
 from sqlalchemy import create_engine, func, select
@@ -16,9 +16,7 @@ from ximrato_server.seed.lookup import seed_all_lookup
 
 
 def _fresh_db():
-    engine = create_engine(
-        "sqlite:///:memory:", connect_args={"check_same_thread": False}
-    )
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     return engine
 
@@ -46,9 +44,7 @@ def test_seed_inserts_only_missing():
     engine = _fresh_db()
     with Session(engine) as db:
         seed_all_lookup(db)
-        cat_id = db.scalar(
-            select(ExerciseCategory.id).where(ExerciseCategory.name == _EXERCISES[0][1])
-        )
+        cat_id = db.scalar(select(ExerciseCategory.id).where(ExerciseCategory.name == _EXERCISES[0][1]))
         db.add(Exercise(name=_EXERCISES[0][0], category_id=cat_id))
         db.commit()
         seed_exercises(db)
@@ -62,9 +58,7 @@ def test_seed_sets_correct_categories():
         seed_all_lookup(db)
         seed_exercises(db)
         exercises = db.scalars(
-            select(Exercise)
-            .join(Exercise.category_ref, isouter=True)
-            .options(selectinload(Exercise.category_ref))
+            select(Exercise).join(Exercise.category_ref, isouter=True).options(selectinload(Exercise.category_ref))
         ).all()
         names_to_cat = {e.name: e.category for e in exercises}
     assert names_to_cat["Bench Press"] == "push"

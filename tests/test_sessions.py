@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/20 13:25:00.000000
-Revised: 2026/03/20 13:35:28.621496
+Revised: 2026/04/06 10:11:33.733175
 """
 
 
@@ -185,9 +185,7 @@ def test_add_set_409_session_ended(client, auth_headers, any_exercise_id):
     assert r.status_code == 409
 
 
-def test_add_set_404_wrong_user_session(
-    client, auth_headers, other_headers, any_exercise_id
-):
+def test_add_set_404_wrong_user_session(client, auth_headers, other_headers, any_exercise_id):
     session_id = client.post("/sessions", headers=auth_headers).json()["id"]
     r = client.post(
         f"/sessions/{session_id}/sets",
@@ -218,7 +216,5 @@ def test_end_session_requires_auth(client):
 
 
 def test_add_set_requires_auth(client):
-    r = client.post(
-        "/sessions/1/sets", json={"exercise_id": 1, "reps": 1, "weight": 0.0}
-    )
+    r = client.post("/sessions/1/sets", json={"exercise_id": 1, "reps": 1, "weight": 0.0})
     assert r.status_code == 401

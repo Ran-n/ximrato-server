@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/03/27 21:24:37.368273
+Revised: 2026/04/06 08:59:28.971632
 """
 
 import logging
@@ -15,11 +15,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect, select, text
 from sqlalchemy.orm import Session as DbSession
 
 from ximrato_server import config, models  # noqa: F401 — registers all ORM models
 from ximrato_server.database import Base, engine
-from ximrato_server.routers import auth, body_metrics, cardio, exercises, health, sessions, users
+from ximrato_server.models.banned_ip import BannedIP
+from ximrato_server.routers import auth, body_metrics, cardio, exercises, health, honeypot, sessions, users
+from ximrato_server.security import BANNED_IPS, get_client_ip
 from ximrato_server.seed import seed_all_lookup, seed_cardio_exercises, seed_exercises
 
 logging.basicConfig(
@@ -30,14 +33,44 @@ logging.basicConfig(
 log = logging.getLogger("ximrato")
 
 
+def _apply_schema_patches() -> None:
+    """Add new columns to existing tables if absent — safe to run on any DB."""
+    inspector = inspect(engine)
+
+    def _add_if_missing(table: str, col: str, ddl: str) -> None:
+        cols = {c["name"] for c in inspector.get_columns(table)}
+        if col not in cols:
+            with engine.connect() as conn:
+                conn.execute(text(ddl))
+                conn.commit()
+
+    _patches = [
+        ("exercises", "equipment_type", "ALTER TABLE exercises ADD COLUMN equipment_type VARCHAR(32)"),
+        ("exercises", "primary_muscles", "ALTER TABLE exercises ADD COLUMN primary_muscles TEXT"),
+        ("exercises", "secondary_muscles", "ALTER TABLE exercises ADD COLUMN secondary_muscles TEXT"),
+        ("exercises", "description", "ALTER TABLE exercises ADD COLUMN description VARCHAR(512)"),
+        ("exercises", "name_es", "ALTER TABLE exercises ADD COLUMN name_es VARCHAR(128)"),
+        ("exercises", "name_gl", "ALTER TABLE exercises ADD COLUMN name_gl VARCHAR(128)"),
+        ("cardio_exercises", "name_es", "ALTER TABLE cardio_exercises ADD COLUMN name_es VARCHAR(128)"),
+        ("cardio_exercises", "name_gl", "ALTER TABLE cardio_exercises ADD COLUMN name_gl VARCHAR(128)"),
+    ]
+    for table, col, ddl in _patches:
+        _add_if_missing(table, col, ddl)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    _apply_schema_patches()
     with DbSession(engine) as db:
         seed_all_lookup(db)
         seed_exercises(db)
         seed_cardio_exercises(db)
     Path(config.UPLOAD_DIR).mkdir(exist_ok=True)
+    with DbSession(engine) as db:
+        banned = db.scalars(select(BannedIP)).all()
+        BANNED_IPS.update(b.ip for b in banned)
+    log.info("loaded %d banned ip(s)", len(BANNED_IPS))
     yield
     engine.dispose()
     log.info("database engine disposed")
@@ -52,6 +85,7 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory=config.UPLOAD_DIR), name="static")
 app.include_router(health.router)
+app.include_router(honeypot.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(exercises.router)
@@ -73,6 +107,15 @@ async def access_log(request: Request, call_next):
         ms,
     )
     return response
+
+
+@app.middleware("http")
+async def ip_ban(request: Request, call_next):
+    ip = get_client_ip(request)
+    if ip in BANNED_IPS:
+        log.info("blocked %s %s from banned ip=%r", request.method, request.url.path, ip)
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return await call_next(request)
 
 
 @app.exception_handler(RequestValidationError)
