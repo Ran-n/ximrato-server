@@ -2,13 +2,13 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/04/06 08:50:40.239133
-Revised: 2026/04/06 08:51:38.678893
+Revised: 2026/04/06 14:09:08.837570
 """
 
 import logging
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from sqlalchemy.orm import Session
 
 from ximrato_server.database import get_db
@@ -95,3 +95,34 @@ async def honeypot_login(request: Request, db: Session = Depends(get_db)):
 async def honeypot_env(request: Request, db: Session = Depends(get_db)):
     _ban(request, db)
     return PlainTextResponse(_FAKE_ENV)
+
+
+@router.get("/xmlrpc.php", response_class=PlainTextResponse)
+@router.post("/xmlrpc.php", response_class=PlainTextResponse)
+async def honeypot_xmlrpc(request: Request, db: Session = Depends(get_db)):
+    _ban(request, db)
+    return PlainTextResponse(
+        '<?xml version="1.0"?><methodResponse><fault><value><struct>'
+        "<member><name>faultCode</name><value><int>403</int></value></member>"
+        "<member><name>faultString</name><value><string>Forbidden</string></value></member>"
+        "</struct></value></fault></methodResponse>",
+        media_type="text/xml",
+    )
+
+
+@router.get("/actuator", response_class=JSONResponse)
+@router.get("/actuator/env", response_class=JSONResponse)
+@router.get("/actuator/health", response_class=JSONResponse)
+@router.get("/actuator/mappings", response_class=JSONResponse)
+async def honeypot_actuator(request: Request, db: Session = Depends(get_db)):
+    _ban(request, db)
+    return JSONResponse({"status": "UP"})
+
+
+@router.get("/console", response_class=HTMLResponse)
+@router.get("/manager/html", response_class=HTMLResponse)
+@router.get("/solr/admin", response_class=HTMLResponse)
+@router.get("/solr/admin/", response_class=HTMLResponse)
+async def honeypot_console(request: Request, db: Session = Depends(get_db)):
+    _ban(request, db)
+    return HTMLResponse(_ADMIN_HTML)

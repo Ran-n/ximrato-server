@@ -2,7 +2,7 @@
 """
 Authors: Ran# <ran.hash@proton.me>
 Created: 2026/03/24 08:51:55.122400
-Revised: 2026/04/06 08:59:28.971632
+Revised: 2026/04/06 14:09:08.746985
 """
 
 import logging
@@ -19,10 +19,10 @@ from sqlalchemy import inspect, select, text
 from sqlalchemy.orm import Session as DbSession
 
 from ximrato_server import config, models  # noqa: F401 — registers all ORM models
-from ximrato_server.database import Base, engine
+from ximrato_server.database import Base, engine, get_db
 from ximrato_server.models.banned_ip import BannedIP
 from ximrato_server.routers import auth, body_metrics, cardio, exercises, health, honeypot, sessions, users
-from ximrato_server.security import BANNED_IPS, get_client_ip
+from ximrato_server.security import BANNED_IPS, ban_ip, get_client_ip, is_scanner_ua
 from ximrato_server.seed import seed_all_lookup, seed_cardio_exercises, seed_exercises
 
 logging.basicConfig(
@@ -114,6 +114,12 @@ async def ip_ban(request: Request, call_next):
     ip = get_client_ip(request)
     if ip in BANNED_IPS:
         log.info("blocked %s %s from banned ip=%r", request.method, request.url.path, ip)
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    ua = request.headers.get("User-Agent", "")
+    if ua and is_scanner_ua(ua):
+        db_factory = request.app.dependency_overrides.get(get_db, get_db)
+        db = next(db_factory())
+        ban_ip(ip, f"scanner-ua:{ua[:80]}", db)
         return JSONResponse({"detail": "Not Found"}, status_code=404)
     return await call_next(request)
 
